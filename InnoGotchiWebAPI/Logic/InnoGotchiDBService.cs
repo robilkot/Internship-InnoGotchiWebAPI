@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InnoGotchiWebAPI.Logic
 {
-    public class InnoGotchiService : IInnoGotchiService
+    public class InnoGotchiDBService : IInnoGotchiDBService
     {
         private readonly InnoGotchiContext _context;
-        public InnoGotchiService(InnoGotchiContext context)
+        public InnoGotchiDBService(InnoGotchiContext context)
         {
             _context = context;
         }
-        public async Task<Pet> DeletePet(Guid id)
+        public async Task<DbPetModel> DeletePet(Guid id)
         {
-            Pet? toDelete = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id);
+            DbPetModel? toDelete = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id);
 
             if (toDelete == null)
             {
@@ -29,30 +29,28 @@ namespace InnoGotchiWebAPI.Logic
             return toDelete;
         }
 
-        public async Task<Pet> GetPet(Guid id)
+        public async Task<DbPetModel> GetPet(Guid id)
         {
-            Pet? toReturn = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id);
+            DbPetModel? toReturn = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id);
 
             return toReturn ?? throw new InnoGotchiException("Can't find specified pet", 404);
         }
 
-        public async Task<IEnumerable<Pet>> GetPets()
+        public async Task<IEnumerable<DbPetModel>> GetPets()
         {
-            IEnumerable<Pet> pets = await _context.Pets.AsNoTracking().ToListAsync();
+            IEnumerable<DbPetModel> pets = await _context.Pets.AsNoTracking().ToListAsync();
             return pets;
         }
 
-        public async Task<Pet> PostPet(Pet pet)
+        public async Task PostPet(DbPetModel pet)
         {
             _context.Pets.Add(pet);
             await _context.SaveChangesAsync();
-
-            return pet;
         }
 
-        public async Task<Pet> PutPet(Pet pet)
+        public async Task<DbPetModel> PutPet(DbPetModel pet)
         {
-            Pet? toEdit = await _context.Pets.FirstOrDefaultAsync(p => p.Id == pet.Id)
+            DbPetModel? toEdit = await _context.Pets.FirstOrDefaultAsync(p => p.Id == pet.Id)
                 ?? throw new InnoGotchiException("Can't find specified pet", 404);
 
             _context.Entry(toEdit).CurrentValues.SetValues(pet);

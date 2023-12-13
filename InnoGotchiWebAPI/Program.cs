@@ -11,7 +11,8 @@ namespace InnoGotchiWebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IInnoGotchiService, InnoGotchiService>();
+            builder.Services.AddScoped<IInnoGotchiDBService, InnoGotchiDBService>();
+            builder.Services.AddScoped<InnoGotchiPetUpdateService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
