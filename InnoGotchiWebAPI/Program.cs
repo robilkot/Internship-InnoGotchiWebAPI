@@ -35,7 +35,7 @@ namespace InnoGotchiWebAPI
             });
 
             // Add db service
-            builder.Services.AddDbContext<InnoGotchiContext>();
+            builder.Services.AddDbContext<InnoGotchiWebContext>();
 
             var app = builder.Build();
 

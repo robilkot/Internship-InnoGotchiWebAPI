@@ -7,8 +7,8 @@ namespace InnoGotchiWebAPI.Logic
 {
     public class InnoGotchiDBService : IInnoGotchiDBService
     {
-        private readonly InnoGotchiContext _context;
-        public InnoGotchiDBService(InnoGotchiContext context)
+        private readonly InnoGotchiWebContext _context;
+        public InnoGotchiDBService(InnoGotchiWebContext context)
         {
             _context = context;
         }
