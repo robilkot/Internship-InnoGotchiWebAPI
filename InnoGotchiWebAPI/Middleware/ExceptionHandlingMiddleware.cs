@@ -1,8 +1,8 @@
-﻿using InnoGotchiWebAPI.Logic;
+﻿using InnoGotchiWebAPI.Exceptions;
 
 namespace InnoGotchiWebAPI.Middleware
 {
-    public class ExceptionHandlingMiddleware
+    public class ExceptionHandlingMiddleware 
     {
         private readonly RequestDelegate _next;
         public ExceptionHandlingMiddleware(RequestDelegate next)

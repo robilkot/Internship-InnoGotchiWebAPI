@@ -1,20 +1,23 @@
-using AutoMapper;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Logic;
 using InnoGotchiWebAPI.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 namespace InnoGotchiWebAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]/pets")]
-    public class InnoGotchiController : ControllerBase
+    [Route("innogotchi/pets")]
+    public class InnoGotchiPetsController : ControllerBase
     {
-        private readonly IInnoGotchiDBService _dbService;
+        private readonly IInnoGotchiDBPetService _dbService;
         private readonly InnoGotchiPetUpdateService _petUpdateService;
 
-        public InnoGotchiController(IInnoGotchiDBService dbService, InnoGotchiPetUpdateService petUpdateService)
+        public InnoGotchiPetsController(IInnoGotchiDBPetService dbService, InnoGotchiPetUpdateService petUpdateService)
         {
             _dbService = dbService;
             _petUpdateService = petUpdateService;
@@ -31,18 +34,19 @@ namespace InnoGotchiWebAPI.Controllers
         ///
         /// </remarks>
         /// <response code="200">Pets succesfully retrieved</response>
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(200)]
         public async Task<ActionResult<IEnumerable<ClientPetModel>>> GetPets()
         {
             var dbPets = await _dbService.GetPets();
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DbPetModel, ClientPetModel>());
-            var mapper = new Mapper(config);
-            var clientPets = mapper.Map<IEnumerable<ClientPetModel>>(dbPets);
-            
+            var clientPets = Mappers.PetDbToClientMapper.Map<IEnumerable<ClientPetModel>>(dbPets);
+
             return new(clientPets);
         }
+
+
 
         /// <summary>
         /// Get pet with given id from db
@@ -64,9 +68,7 @@ namespace InnoGotchiWebAPI.Controllers
         {
             var dbPet = await _dbService.GetPet(id);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DbPetModel, ClientPetModel>());
-            var mapper = new Mapper(config);
-            var clientPet = mapper.Map<ClientPetModel>(dbPet);
+            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(dbPet);
 
             return new(clientPet);
         }
@@ -90,9 +92,7 @@ namespace InnoGotchiWebAPI.Controllers
         {
             var dbPet = await _dbService.DeletePet(id);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DbPetModel, ClientPetModel>());
-            var mapper = new Mapper(config);
-            var clientPet = mapper.Map<ClientPetModel>(dbPet);
+            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(dbPet);
 
             return new(clientPet);
         }
@@ -114,10 +114,8 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(409)]
         public async Task<ActionResult> PostPet(ClientPetModel pet)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<ClientPetModel, DbPetModel> ());
-            var mapper = new Mapper(config);
-            var dbPet = mapper.Map<DbPetModel>(pet);
-            
+            var dbPet = Mappers.PetClientToDbMapper.Map<DbPetModel>(pet);
+
             await _dbService.PostPet(dbPet);
 
             return Ok();
@@ -140,9 +138,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> PutPet(ClientPetModel pet)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<ClientPetModel, DbPetModel>());
-            var mapper = new Mapper(config);
-            var dbPet = mapper.Map<DbPetModel>(pet);
+            var dbPet = Mappers.PetClientToDbMapper.Map<DbPetModel>(pet);
 
             await _dbService.PutPet(dbPet);
 
@@ -164,13 +160,13 @@ namespace InnoGotchiWebAPI.Controllers
         [HttpGet("{id:Guid}/feed")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Feed(Guid id)
+        public async Task<ActionResult<ClientPetModel>> Feed(Guid id)
         {
-            var pet = await _dbService.GetPet(id);
-            _petUpdateService.Feed(pet);
-            await _dbService.PutPet(pet);
+            var pet = await _petUpdateService.Feed(id);
 
-            return Ok();
+            var clientPet = Mappers.PetClientToDbMapper.Map<ClientPetModel>(pet);
+
+            return new(clientPet);
         }
 
         /// <summary>
@@ -188,13 +184,13 @@ namespace InnoGotchiWebAPI.Controllers
         [HttpGet("{id:Guid}/givedrink")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> GiveDrink(Guid id)
+        public async Task<ActionResult<ClientPetModel>> GiveDrink(Guid id)
         {
-            var pet = await _dbService.GetPet(id);
-            _petUpdateService.GiveDrink(pet);
-            await _dbService.PutPet(pet);
+            var pet = await _petUpdateService.GiveDrink(id);
 
-            return Ok();
+            var clientPet = Mappers.PetClientToDbMapper.Map<ClientPetModel>(pet);
+
+            return new(clientPet);
         }
 
         /// <summary>
@@ -212,13 +208,13 @@ namespace InnoGotchiWebAPI.Controllers
         [HttpGet("{id:Guid}/update")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Update(Guid id)
+        public async Task<ActionResult<DbPetModel>> Update(Guid id)
         {
-            var pet = await _dbService.GetPet(id);
-            _petUpdateService.Update(pet);
-            await _dbService.PutPet(pet);
+            var pet = await _petUpdateService.Update(id);
 
-            return Ok();
+            // map
+
+            return new(pet);
         }
 
         /// <summary>
@@ -236,7 +232,7 @@ namespace InnoGotchiWebAPI.Controllers
         public async Task<ActionResult> UpdateAll()
         {
             await _petUpdateService.UpdateAll();
-            
+
             return Ok();
         }
     }

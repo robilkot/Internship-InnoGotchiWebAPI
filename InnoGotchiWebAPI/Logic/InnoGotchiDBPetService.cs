@@ -2,13 +2,14 @@
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using InnoGotchiWebAPI.Exceptions;
 
 namespace InnoGotchiWebAPI.Logic
 {
-    public class InnoGotchiDBService : IInnoGotchiDBService
+    public class InnoGotchiDBPetService : IInnoGotchiDBPetService
     {
-        private readonly InnoGotchiWebContext _context;
-        public InnoGotchiDBService(InnoGotchiWebContext context)
+        private readonly InnoGotchiContext _context;
+        public InnoGotchiDBPetService(InnoGotchiContext context)
         {
             _context = context;
         }

@@ -1,4 +1,4 @@
-﻿namespace InnoGotchiWebAPI.Logic
+﻿namespace InnoGotchiWebAPI.Exceptions
 {
     public class InnoGotchiException : Exception
     {

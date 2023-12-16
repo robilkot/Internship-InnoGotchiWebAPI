@@ -2,7 +2,7 @@
 
 namespace InnoGotchiWebAPI.Interfaces
 {
-    public interface IInnoGotchiDBService
+    public interface IInnoGotchiDBPetService
     {
         public Task<IEnumerable<DbPetModel>> GetPets();
         public Task<DbPetModel> GetPet(Guid id);

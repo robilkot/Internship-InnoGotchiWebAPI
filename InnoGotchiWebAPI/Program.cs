@@ -2,7 +2,8 @@ using InnoGotchiWebAPI.Database;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Logic;
 using InnoGotchiWebAPI.Middleware;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 
 namespace InnoGotchiWebAPI
@@ -13,29 +14,74 @@ namespace InnoGotchiWebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IInnoGotchiDBService, InnoGotchiDBService>();
             builder.Services.AddScoped<InnoGotchiPetUpdateService>();
+            builder.Services.AddScoped<IInnoGotchiDBPetService, InnoGotchiDBPetService>();
+            builder.Services.AddScoped<IInnoGotchiDBUserService, InnoGotchiDBUserService>();
+            builder.Services.AddScoped<IInnoGotchiLoginService, InnoGotchiLoginService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "InnoGotchiWebAPI",
-                    Version = "v1",
-                    Description = "Description of all controller methods."
-                });
-
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
 
-            // Add db service
-            builder.Services.AddDbContext<InnoGotchiWebContext>();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    // Todo: what are these two?
+                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = AppConstants.TokenIssuer,
+
+                    IssuerSigningKey = AppConstants.GetSymmetricSecurityKey(),
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                // Todo: study this bs through
+                //
+                //options.Events = new JwtBearerEvents()
+                //{
+                //    OnChallenge = context =>
+                //    {
+                //        context.HandleResponse();
+                //        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                //        context.Response.ContentType = "application/json";
+
+                //        // Ensure we always have an error and error description.
+                //        if (string.IsNullOrEmpty(context.Error))
+                //            context.Error = "invalid_token";
+                //        if (string.IsNullOrEmpty(context.ErrorDescription))
+                //            context.ErrorDescription = "This request requires a valid JWT access token to be provided";
+
+                //        // Add some extra context for expired tokens.
+                //        if (context.AuthenticateFailure != null && context.AuthenticateFailure.GetType() == typeof(SecurityTokenExpiredException))
+                //        {
+                //            var authenticationException = context.AuthenticateFailure as SecurityTokenExpiredException;
+                //            context.Response.Headers.Add("x-token-expired", authenticationException.Expires.ToString("o"));
+                //            context.ErrorDescription = $"The token expired on {authenticationException.Expires.ToString("o")}";
+                //        }
+
+                //        return context.Response.WriteAsync(JsonSerializer.Serialize(new
+                //        {
+                //            error = context.Error,
+                //            error_description = context.ErrorDescription
+                //        }));
+                //    }
+                //};
+            });
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddDbContext<InnoGotchiContext>();
 
             var app = builder.Build();
 
@@ -46,49 +92,12 @@ namespace InnoGotchiWebAPI
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseInnoGotchiExceptionHandler();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.MapControllers();
-
-            {
-
-                //app.MapGet("/api/pets", async (InnoGotchiContext db) => await db.Pets.ToListAsync());
-
-                //app.MapGet("/api/pets/{id:Guid}", async (Guid id, InnoGotchiContext db) =>
-                //{
-                //    Pet? pet = await db.Pets.FirstOrDefaultAsync(u => u.Id == id);
-
-                //    if (pet == null) return Results.NotFound(new { message = "Pet not found" });
-
-                //    return Results.Json(pet);
-                //});
-
-                //app.MapDelete("/api/pets/{id:Guid}", async (Guid id, InnoGotchiContext db) =>
-                //{
-                //    Pet? pet = await db.Pets.FirstOrDefaultAsync(u => u.Id == id);
-
-                //    if (pet == null) return Results.NotFound(new { message = "Pet not found" });
-
-                //    Console.WriteLine($"Tried to delete {pet.Id}");
-                //    //db.Pets.Remove(pet);
-                //    //await db.SaveChangesAsync();
-                //    return Results.Json(pet);
-                //});
-
-                //app.Use(async (context, next) =>
-                //{
-                //    await next.Invoke();
-                //    Console.WriteLine($"Path: {context.Request.Path}");
-                //});
-
-                //app.Run(async (context) =>
-                //{
-                //    await context.Response.WriteAsync("Here speaks the terminating middleware");
-                //});
-
-            }
 
             app.Run();
         }

@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using InnoGotchiWebAPI.Models;
+﻿using InnoGotchiWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace InnoGotchiWebAPI.Database;
 
-public partial class InnoGotchiWebContext : DbContext
+public partial class InnoGotchiContext : DbContext
 {
-    public InnoGotchiWebContext()
+    public InnoGotchiContext()
     {
     }
 
-    public InnoGotchiWebContext(DbContextOptions<InnoGotchiWebContext> options)
+    public InnoGotchiContext(DbContextOptions<InnoGotchiContext> options)
         : base(options)
     {
     }

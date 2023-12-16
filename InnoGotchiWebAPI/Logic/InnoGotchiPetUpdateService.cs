@@ -5,21 +5,34 @@ namespace InnoGotchiWebAPI.Logic
 {
     public class InnoGotchiPetUpdateService
     {
-        private readonly IInnoGotchiDBService _dbService;
-        public InnoGotchiPetUpdateService(IInnoGotchiDBService dbService)
+        private readonly IInnoGotchiDBPetService _dbService;
+        public InnoGotchiPetUpdateService(IInnoGotchiDBPetService dbService)
         {
             _dbService = dbService;
         }
-        public async Task UpdateAll()
+
+        public async Task<IEnumerable<DbPetModel>> UpdateAll()
         {
             var pets = await _dbService.GetPets();
 
             foreach (var pet in pets)
             {
-                Update(pet);
+                UpdateModel(pet);
             }
+
+            return pets;
         }
-        public void Update(DbPetModel pet)
+
+        public async Task<DbPetModel> Update(Guid id)
+        {
+            DbPetModel pet = await _dbService.GetPet(id);
+
+            UpdateModel(pet);
+
+            return pet;
+        }
+
+        private static void UpdateModel(DbPetModel pet)
         {
             if (pet.Dead)
             {
@@ -58,37 +71,41 @@ namespace InnoGotchiWebAPI.Logic
             }
         }
 
-        public void GiveDrink(DbPetModel pet)
+        public async Task<DbPetModel> GiveDrink(Guid id)
         {
-            Update(pet);
+            DbPetModel pet = await _dbService.GetPet(id);
 
-            if (pet.Dead)
+            UpdateModel(pet);
+
+            if (pet.Dead == false)
             {
-                return;
+                if (pet.Hunger < Hunger.Full)
+                {
+                    pet.Hunger++;
+                }
+
+                pet.LastEatTime = DateTime.Now;
             }
 
-            if (pet.Thirst < Thirst.Full)
-            {
-                pet.Thirst++;
-            }
-
-            pet.LastDrinkTime = DateTime.Now;
+            return pet;
         }
-        public void Feed(DbPetModel pet)
+        public async Task<DbPetModel> Feed(Guid id)
         {
-            Update(pet);
+            DbPetModel pet = await _dbService.GetPet(id);
 
-            if (pet.Dead)
+            UpdateModel(pet);
+
+            if (pet.Dead == false)
             {
-                return;
+                if (pet.Hunger < Hunger.Full)
+                {
+                    pet.Hunger++;
+                }
+
+                pet.LastEatTime = DateTime.Now;
             }
 
-            if (pet.Hunger < Hunger.Full)
-            {
-                pet.Hunger++;
-            }
-
-            pet.LastEatTime = DateTime.Now;
+            return pet;
         }
     }
 }
