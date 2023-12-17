@@ -35,7 +35,7 @@ namespace InnoGotchiWebAPI
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    // Todo: what are these two?
+                    // todo: what are issuer and audience for?
                     ValidateAudience = false,
                     ValidateIssuer = true,
                     ValidIssuer = AppConstants.TokenIssuer,
@@ -47,7 +47,7 @@ namespace InnoGotchiWebAPI
                     ClockSkew = TimeSpan.Zero
                 };
 
-                // Todo: study this bs through
+                // todo: should study this bs through. rn this is just copypasted code from stackoverflow that helped to resolve jwt tokens issues
                 //
                 //options.Events = new JwtBearerEvents()
                 //{

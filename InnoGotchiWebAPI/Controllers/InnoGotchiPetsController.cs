@@ -104,7 +104,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ClientPetModel>> DeletePet(Guid id)
         {
-            // todo: Is this optimal?
+            // todo: Is this method optimal? Seems like too many db requests
             var dbPet = await _dbService.GetPet(id);
 
             if (CheckOwnership(dbPet) == false)
@@ -143,7 +143,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Todo: is it ok to set ownership here?
+            // todo: Is it ok to set ownership here?
             dbPet.OwnerId = userlogin!;
 
             await _dbService.PostPet(dbPet, userlogin!);
@@ -324,7 +324,7 @@ namespace InnoGotchiWebAPI.Controllers
             return Ok();
         }
 
-        // todo: Bad practice? How to implement check properly?
+        // todo: how and where to implement check properly?
         [NonAction]
         private bool CheckOwnership(DbPetModel pet)
         {

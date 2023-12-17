@@ -4,7 +4,7 @@ namespace InnoGotchiWebAPI.Models
 {
     public static class Mappers
     {
-        // todo: make config not mappers. use DI then
+        // todo: should set configs not mappers here
         public static readonly MapperConfiguration PetClientToDbConfig = new(cfg => cfg.CreateMap<ClientPetModel, DbPetModel>());
         public static readonly MapperConfiguration PetDbToClientConfig = new(cfg => cfg.CreateMap<DbPetModel, ClientPetModel>());
         public static readonly Mapper PetClientToDbMapper = new (PetClientToDbConfig);

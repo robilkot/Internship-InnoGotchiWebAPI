@@ -28,13 +28,8 @@ namespace InnoGotchiWebAPI.Logic
             }
             else 
             {
+                // Note that dbUserPetsModel deletes on cascade
                 _context.Pets.Remove(toDelete);
-
-                // Todo: check if this deletes automatically on cascade
-                //
-                //var usersPetModel = _context.UsersPets.First(u => u.PetId == id);
-                //_context.UsersPets.Remove(usersPetModel);
-
                 await _context.SaveChangesAsync();
             }
 
