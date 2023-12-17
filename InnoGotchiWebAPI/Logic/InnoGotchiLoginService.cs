@@ -1,12 +1,11 @@
-﻿using InnoGotchiWebAPI.Interfaces;
+﻿using InnoGotchiWebAPI.Exceptions;
+using InnoGotchiWebAPI.Interfaces;
+using InnoGotchiWebAPI.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using InnoGotchiWebAPI.Exceptions;
-using InnoGotchiWebAPI.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace InnoGotchiWebAPI.Logic
 {
@@ -30,7 +29,8 @@ namespace InnoGotchiWebAPI.Logic
             }
 
             var claims = new List<Claim> {
-                new Claim(ClaimTypes.NameIdentifier, login)
+                new Claim(ClaimTypes.NameIdentifier, login),
+                new Claim(ClaimTypes.Role, user.Role!)
             };
 
             var jwt = new JwtSecurityToken(
@@ -49,7 +49,7 @@ namespace InnoGotchiWebAPI.Logic
 
         public async Task Register(string login, string password, string? nickname = default)
         {
-            if(await _dbUserService.UserExists(login))
+            if (await _dbUserService.UserExists(login))
             {
                 throw new InnoGotchiException("User with this login already exists", 409);
             }

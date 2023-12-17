@@ -1,5 +1,5 @@
-﻿using InnoGotchiWebAPI.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using InnoGotchiWebAPI.Models;
 
 namespace InnoGotchiWebAPI.Database;
 
@@ -22,7 +22,7 @@ public partial class InnoGotchiContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=InnoGotchiWeb;TrustServerCertificate=True;Trusted_Connection=True;");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=InnoGotchiWeb;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,6 +37,7 @@ public partial class InnoGotchiContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.OwnerId).HasMaxLength(20);
             entity.Property(e => e.Updated).HasColumnType("datetime");
         });
 
@@ -47,13 +48,14 @@ public partial class InnoGotchiContext : DbContext
             entity.Property(e => e.Login).HasMaxLength(20);
             entity.Property(e => e.Nickname).HasMaxLength(20);
             entity.Property(e => e.Password)
-                .HasMaxLength(16)
+                .HasMaxLength(20)
                 .IsFixedLength();
+            entity.Property(e => e.Role).HasMaxLength(20);
         });
 
         modelBuilder.Entity<DbUsersPetModel>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.UserLogin).HasMaxLength(20);
 

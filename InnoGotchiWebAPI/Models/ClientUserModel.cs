@@ -4,5 +4,6 @@ public class ClientUserModel
 {
     public string Login { get; set; } = null!;
     public string? Nickname { get; set; } = null;
+    public string? Role { get; set; }
     public string Token { get; set; } = null!;
 }

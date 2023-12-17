@@ -2,6 +2,7 @@
 
 public partial class DbUsersPetModel
 {
+    public Guid Id { get; set; }
     public string UserLogin { get; set; } = null!;
 
     public Guid PetId { get; set; }

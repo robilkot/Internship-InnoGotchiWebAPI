@@ -13,6 +13,11 @@ namespace InnoGotchiWebAPI.Logic
         {
             _context = context;
         }
+
+        public async Task<bool> PetExists(Guid id)
+        {
+            return await _context.Pets.AnyAsync(p => p.Id == id);
+        }
         public async Task<DbPetModel> DeletePet(Guid id)
         {
             DbPetModel? toDelete = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id);
@@ -24,6 +29,12 @@ namespace InnoGotchiWebAPI.Logic
             else 
             {
                 _context.Pets.Remove(toDelete);
+
+                // Todo: check if this deletes automatically on cascade
+                //
+                //var usersPetModel = _context.UsersPets.First(u => u.PetId == id);
+                //_context.UsersPets.Remove(usersPetModel);
+
                 await _context.SaveChangesAsync();
             }
 
@@ -37,15 +48,24 @@ namespace InnoGotchiWebAPI.Logic
             return toReturn ?? throw new InnoGotchiException("Can't find specified pet", 404);
         }
 
-        public async Task<IEnumerable<DbPetModel>> GetPets()
+        public async Task<IEnumerable<DbPetModel>> GetPets(string userlogin)
         {
-            IEnumerable<DbPetModel> pets = await _context.Pets.AsNoTracking().ToListAsync();
+            IEnumerable<DbPetModel> pets = await _context.Pets.Where(p => p.OwnerId == userlogin).AsNoTracking().ToListAsync();
             return pets;
         }
 
-        public async Task PostPet(DbPetModel pet)
+        public async Task PostPet(DbPetModel pet, string userlogin)
         {
             _context.Pets.Add(pet);
+
+            DbUsersPetModel userPetModel = new()
+            {
+                PetId = pet.Id,
+                UserLogin = userlogin
+            };
+
+            _context.UsersPets.Add(userPetModel);
+
             await _context.SaveChangesAsync();
         }
 

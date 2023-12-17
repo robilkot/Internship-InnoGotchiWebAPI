@@ -9,9 +9,11 @@ namespace InnoGotchiWebAPI
         public static readonly int PetEatInterval = 3600;
         public static readonly int PetDrinkInterval = 3600;
 
+        public static readonly string DefaultRole = "user";
+
         public static readonly string TokenSecretKey = "InnogotchiSecretKey";
         public static readonly string TokenIssuer = "innogotchi";
-        public static readonly TimeSpan TokenLifeTime = TimeSpan.FromSeconds(20);
+        public static readonly TimeSpan TokenLifeTime = TimeSpan.FromMinutes(45);
         public static SymmetricSecurityKey GetSymmetricSecurityKey() => new(Encoding.UTF8.GetBytes(TokenSecretKey));
     }
 }

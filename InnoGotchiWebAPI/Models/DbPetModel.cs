@@ -64,5 +64,6 @@
             get => _dead;
             set => _dead = value;
         }
+        public string OwnerId { get; set; } = null!;
     }
 }

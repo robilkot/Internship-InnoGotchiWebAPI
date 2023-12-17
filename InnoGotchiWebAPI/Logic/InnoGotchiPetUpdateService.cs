@@ -11,9 +11,9 @@ namespace InnoGotchiWebAPI.Logic
             _dbService = dbService;
         }
 
-        public async Task<IEnumerable<DbPetModel>> UpdateAll()
+        public async Task<IEnumerable<DbPetModel>> UpdateAll(string userlogin)
         {
-            var pets = await _dbService.GetPets();
+            var pets = await _dbService.GetPets(userlogin);
 
             foreach (var pet in pets)
             {

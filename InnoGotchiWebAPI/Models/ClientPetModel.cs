@@ -75,16 +75,7 @@ namespace InnoGotchiWebAPI.Models
             get => _dead;
             init => _dead = value;
         }
-
-        //public ClientPetModel() { }
-        //public ClientPetModel(Body body, Eyes eyes, Nose nose, Mouth mouth, string name)
-        //{
-        //    Body = body;
-        //    Eyes = eyes;
-        //    Nose = nose;
-        //    Mouth = mouth;
-        //    Name = name;
-        //}
+        public string OwnerId { get; set; } = null!;
 
         public override string ToString()
         {

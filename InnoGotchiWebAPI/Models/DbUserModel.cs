@@ -7,4 +7,6 @@ public partial class DbUserModel
     public byte[]? Password { get; set; }
 
     public string? Nickname { get; set; }
+
+    public string? Role { get; set; } = AppConstants.DefaultRole;
 }
