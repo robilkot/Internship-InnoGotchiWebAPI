@@ -1,4 +1,5 @@
-﻿using InnoGotchiWebAPI.Exceptions;
+﻿using AutoMapper;
+using InnoGotchiWebAPI.Exceptions;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Models;
 using Microsoft.IdentityModel.Tokens;
@@ -12,9 +13,11 @@ namespace InnoGotchiWebAPI.Logic
     public class InnoGotchiLoginService : IInnoGotchiLoginService
     {
         private readonly IInnoGotchiDBUserService _dbUserService;
-        public InnoGotchiLoginService(IInnoGotchiDBUserService dbUserService)
+        private readonly IMapper _mapper;
+        public InnoGotchiLoginService(IInnoGotchiDBUserService dbUserService, IMapper mapper)
         {
             _dbUserService = dbUserService;
+            _mapper = mapper;
         }
 
         public async Task<ClientUserModel> Login(string login, string password)
@@ -40,7 +43,7 @@ namespace InnoGotchiWebAPI.Logic
                     signingCredentials: new SigningCredentials(AppConstants.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var token = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            var clientUser = Mappers.UserDbToClientMapper.Map<ClientUserModel>(user);
+            var clientUser = _mapper.Map<ClientUserModel>(user);
             clientUser.Token = token;
 
             return clientUser;

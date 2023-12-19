@@ -1,3 +1,4 @@
+using AutoMapper;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Logic;
 using InnoGotchiWebAPI.Models;
@@ -13,11 +14,13 @@ namespace InnoGotchiWebAPI.Controllers
     {
         private readonly IInnoGotchiDBPetService _dbService;
         private readonly InnoGotchiPetUpdateService _petUpdateService;
+        private readonly IMapper _mapper;
 
-        public InnoGotchiPetsController(IInnoGotchiDBPetService dbService, InnoGotchiPetUpdateService petUpdateService)
+        public InnoGotchiPetsController(IInnoGotchiDBPetService dbService, InnoGotchiPetUpdateService petUpdateService, IMapper mapper)
         {
             _dbService = dbService;
             _petUpdateService = petUpdateService;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -42,7 +45,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             var dbPets = await _dbService.GetPets(userlogin!);
 
-            var clientPets = Mappers.PetDbToClientMapper.Map<IEnumerable<ClientPetModel>>(dbPets);
+            var clientPets = _mapper.Map<IEnumerable<ClientPetModel>>(dbPets);
 
             return new(clientPets);
         }
@@ -77,7 +80,7 @@ namespace InnoGotchiWebAPI.Controllers
                 return Forbid();
             }
 
-            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(dbPet);
+            var clientPet = _mapper.Map<ClientPetModel>(dbPet);
 
             return new(clientPet);
         }
@@ -114,7 +117,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             dbPet = await _dbService.DeletePet(id);
 
-            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(dbPet);
+            var clientPet = _mapper.Map<ClientPetModel>(dbPet);
 
             return new(clientPet);
         }
@@ -139,7 +142,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(409)]
         public async Task<ActionResult> PostPet(ClientPetModel pet)
         {
-            var dbPet = Mappers.PetClientToDbMapper.Map<DbPetModel>(pet);
+            var dbPet = _mapper.Map<DbPetModel>(pet);
 
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -185,7 +188,7 @@ namespace InnoGotchiWebAPI.Controllers
                 }
             }
 
-            var dbPet = Mappers.PetClientToDbMapper.Map<DbPetModel>(pet);
+            var dbPet = _mapper.Map<DbPetModel>(pet);
 
             await _dbService.PutPet(dbPet);
 
@@ -223,7 +226,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             var pet = await _petUpdateService.Feed(id);
 
-            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(pet);
+            var clientPet = _mapper.Map<ClientPetModel>(pet);
 
             return new(clientPet);
         }
@@ -259,7 +262,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             var pet = await _petUpdateService.GiveDrink(id);
 
-            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(pet);
+            var clientPet = _mapper.Map<ClientPetModel>(pet);
 
             return new(clientPet);
         }
@@ -295,7 +298,7 @@ namespace InnoGotchiWebAPI.Controllers
 
             var pet = await _petUpdateService.Update(id);
 
-            var clientPet = Mappers.PetDbToClientMapper.Map<ClientPetModel>(pet);
+            var clientPet = _mapper.Map<ClientPetModel>(pet);
 
             return new(clientPet);
         }

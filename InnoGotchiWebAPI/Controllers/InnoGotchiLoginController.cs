@@ -1,3 +1,4 @@
+using AutoMapper;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,12 @@ namespace InnoGotchiWebAPI.Controllers
     public class InnoGotchiLoginController : ControllerBase
     {
         private readonly IInnoGotchiLoginService _loginService;
+        private readonly IMapper _mapper;
 
-        public InnoGotchiLoginController(IInnoGotchiLoginService loginService)
+        public InnoGotchiLoginController(IInnoGotchiLoginService loginService, IMapper mapper)
         {
             _loginService = loginService;
+            _mapper = mapper;
         }
 
         [HttpPost("login")]

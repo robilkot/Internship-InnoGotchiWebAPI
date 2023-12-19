@@ -5,6 +5,7 @@ using InnoGotchiWebAPI.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using InnoGotchiWebAPI.Models.MapperProfiles;
 
 namespace InnoGotchiWebAPI
 {
@@ -13,6 +14,8 @@ namespace InnoGotchiWebAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddAutoMapper(typeof(ControllerProfile));
 
             builder.Services.AddScoped<InnoGotchiPetUpdateService>();
             builder.Services.AddScoped<IInnoGotchiDBPetService, InnoGotchiDBPetService>();
