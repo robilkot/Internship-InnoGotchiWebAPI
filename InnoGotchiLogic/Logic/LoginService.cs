@@ -1,10 +1,6 @@
-﻿using AutoMapper;
-using InnoGotchiWebAPI.Exceptions;
+﻿using InnoGotchiWebAPI.Exceptions;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Models;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -26,7 +22,7 @@ namespace InnoGotchiWebAPI.Logic
 
             if (user.Password!.SequenceEqual(hashedPassword) == false)
             {
-                throw new InnoGotchiException("Wrong password", 401);
+                throw new InnoGotchiWrongPassowordException();
             }
 
             return user;
@@ -35,11 +31,6 @@ namespace InnoGotchiWebAPI.Logic
 
         public async Task Register(string login, string password, string? nickname = default)
         {
-            if (await _dbService.UserExists(login))
-            {
-                throw new InnoGotchiException("User with this login already exists", 409);
-            }
-
             var hashedPassword = GetHashedPassword(password);
 
             DbUserModel userModel = new()

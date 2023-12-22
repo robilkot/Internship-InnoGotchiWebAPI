@@ -1,10 +1,10 @@
 ﻿namespace InnoGotchiWebAPI.Exceptions
 {
-    public class InnoGotchiException : Exception
+    public class InnoGotchiLogicException : Exception
     {
         public int? StatusCode = null;
 
-        public InnoGotchiException(string? message, int? statusCode = default) : base(message)
+        public InnoGotchiLogicException(string? message, int? statusCode = default) : base(message)
         {
             StatusCode = statusCode;
         }

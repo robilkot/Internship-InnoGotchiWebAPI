@@ -1,6 +1,4 @@
-﻿using InnoGotchiWebAPI.Options;
-
-namespace InnoGotchiWebAPI.Models;
+﻿namespace InnoGotchiWebAPI.Models;
 
 public partial class DbUserModel
 {

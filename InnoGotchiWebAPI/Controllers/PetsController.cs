@@ -133,7 +133,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(409)]
-        public async Task<ActionResult> PostPet(ClientPetModel pet)
+        public async Task<ActionResult> AddPet(ClientPetModel pet)
         {
             var dbPet = _mapper.Map<DbPetModel>(pet);
 
@@ -194,7 +194,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> Feed(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<ActionResult<ClientPetModel>> Feed(Guid id, IOptions<LogicOptions> innogotchiOptions)
         {
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
          
@@ -226,7 +226,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> GiveDrink(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<ActionResult<ClientPetModel>> GiveDrink(Guid id, IOptions<LogicOptions> innogotchiOptions)
         {
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -258,7 +258,7 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> Update(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<ActionResult<ClientPetModel>> Update(Guid id, IOptions<LogicOptions> innogotchiOptions)
         {
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -285,7 +285,7 @@ namespace InnoGotchiWebAPI.Controllers
         [Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<ActionResult> UpdateAll(IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<ActionResult> UpdateAll(IOptions<LogicOptions> innogotchiOptions)
         {
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

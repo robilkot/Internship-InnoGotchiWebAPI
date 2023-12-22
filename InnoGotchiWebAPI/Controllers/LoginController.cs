@@ -26,7 +26,7 @@ namespace InnoGotchiWebAPI.Controllers
         }
 
         [HttpPost("token")]
-        public async Task<ActionResult<string>> Login([FromHeader] string login, [FromHeader] string password, IOptions<LoginOptions> loginOptions, [FromServices] IConfiguration configuration)
+        public async Task<ActionResult<string>> Login([FromForm] string login, [FromForm] string password, IOptions<LoginOptions> loginOptions, [FromServices] IConfiguration configuration)
         {
             var clientUser = await _loginService.Login(login, password);
 
@@ -38,7 +38,7 @@ namespace InnoGotchiWebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromHeader] string login, [FromHeader] string password, [FromHeader] string? nickname = default)
+        public async Task<ActionResult> Register([FromForm] string login, [FromForm] string password, [FromForm] string? nickname = default)
         {
             await _loginService.Register(login, password, nickname);
 

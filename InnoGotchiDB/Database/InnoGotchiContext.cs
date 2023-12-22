@@ -1,22 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using InnoGotchiWebAPI.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
+﻿using InnoGotchiWebAPI.Models;
+using InnoGotchiWebAPI.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace InnoGotchiWebAPI.Database;
 
 public partial class InnoGotchiContext : DbContext
 {
-    private readonly IConfiguration _configuration;
-    public InnoGotchiContext(IConfiguration configuration)
+    private readonly IOptions<DBOptions> _dbOptions;
+    public InnoGotchiContext(IOptions<DBOptions> configuration)
     {
-        _configuration = configuration;
+        _dbOptions = configuration;
     }
 
-    public InnoGotchiContext(DbContextOptions<InnoGotchiContext> options, IConfiguration configuration)
+    public InnoGotchiContext(DbContextOptions<InnoGotchiContext> options, IOptions<DBOptions> dbOptions)
         : base(options)
     {
-        _configuration = configuration;
+        _dbOptions = dbOptions;
     }
 
     public virtual DbSet<DbPetModel> Pets { get; set; }
@@ -26,7 +26,7 @@ public partial class InnoGotchiContext : DbContext
     public virtual DbSet<DbUsersPetModel> UsersPets { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-       => optionsBuilder.UseSqlServer(_configuration["InnoGotchi:ConnectionString"]!);
+       => optionsBuilder.UseSqlServer(_dbOptions.Value.ConnectionString);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

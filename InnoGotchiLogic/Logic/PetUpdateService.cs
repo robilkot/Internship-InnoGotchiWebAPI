@@ -2,7 +2,6 @@
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Models;
 using InnoGotchiWebAPI.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace InnoGotchiWebAPI.Logic
@@ -16,19 +15,21 @@ namespace InnoGotchiWebAPI.Logic
             _dbService = dbService;
         }
 
-        public async Task<IEnumerable<DbPetModel>> UpdateAll(string userlogin, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<IEnumerable<DbPetModel>> UpdateAll(string userlogin, IOptions<LogicOptions> innogotchiOptions)
         {
             var pets = await _dbService.GetPets(userlogin);
 
             foreach (var pet in pets)
             {
                 UpdateModel(pet, innogotchiOptions);
+
+                await _dbService.UpdatePet(pet, userlogin);
             }
 
             return pets;
         }
 
-        public async Task<DbPetModel> Update(Guid id, string userlogin, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<DbPetModel> Update(Guid id, string userlogin, IOptions<LogicOptions> innogotchiOptions)
         {
             DbPetModel pet = await _dbService.GetPet(id, userlogin);
 
@@ -39,7 +40,7 @@ namespace InnoGotchiWebAPI.Logic
             return pet;
         }
 
-        private static void UpdateModel(DbPetModel pet, IOptions<InnoGotchiOptions> innogotchiOptions)
+        private static void UpdateModel(DbPetModel pet, IOptions<LogicOptions> innogotchiOptions)
         {
             if (pet.Dead)
             {
@@ -78,14 +79,9 @@ namespace InnoGotchiWebAPI.Logic
             }
         }
 
-        public async Task<DbPetModel> GiveDrink(Guid id, string userlogin, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<DbPetModel> GiveDrink(Guid id, string userlogin, IOptions<LogicOptions> innogotchiOptions)
         {
             DbPetModel pet = await _dbService.GetPet(id, userlogin);
-
-            if (pet.OwnerId != userlogin)
-            {
-                throw new InnoGotchiException("Not your pet", 403);
-            }
 
             UpdateModel(pet, innogotchiOptions);
 
@@ -103,14 +99,9 @@ namespace InnoGotchiWebAPI.Logic
 
             return pet;
         }
-        public async Task<DbPetModel> Feed(Guid id, string userlogin, IOptions<InnoGotchiOptions> innogotchiOptions)
+        public async Task<DbPetModel> Feed(Guid id, string userlogin, IOptions<LogicOptions> innogotchiOptions)
         {
             DbPetModel pet = await _dbService.GetPet(id, userlogin);
-
-            if (pet.OwnerId != userlogin)
-            {
-                throw new InnoGotchiException("Not your pet", 403);
-            }
 
             UpdateModel(pet, innogotchiOptions);
 

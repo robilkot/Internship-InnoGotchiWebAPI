@@ -24,13 +24,13 @@ namespace InnoGotchiWebAPI.Logic
 
             if (toDelete == null)
             {
-                throw new InnoGotchiPetNotFoundException();
+                throw new InnoGotchiNotFoundException();
             }
             else 
             {
                 if (toDelete?.OwnerId != userlogin)
                 {
-                    throw new InnoGotchiException("Not your pet", 403);
+                    throw new InnoGotchiNotYourPetException();
                 }
 
                 // Note that dbUserPetsModel deletes on cascade
@@ -47,10 +47,10 @@ namespace InnoGotchiWebAPI.Logic
 
             if (toReturn?.OwnerId != userlogin)
             {
-                throw new InnoGotchiException("Not your pet", 403);
+                throw new InnoGotchiNotYourPetException();
             }
 
-            return toReturn ?? throw new InnoGotchiPetNotFoundException();
+            return toReturn ?? throw new InnoGotchiNotFoundException();
         }
 
         public async Task<IEnumerable<DbPetModel>> GetPets(string userlogin)
@@ -61,6 +61,11 @@ namespace InnoGotchiWebAPI.Logic
 
         public async Task AddPet(DbPetModel pet)
         {
+            if(await PetExists(pet.Id))
+            {
+                throw new InnoGotchiDBException("Specified pet already exists. Use update", 409);
+            }
+
             _context.Pets.Add(pet);
 
             DbUsersPetModel userPetModel = new()
@@ -77,11 +82,11 @@ namespace InnoGotchiWebAPI.Logic
         public async Task<DbPetModel> UpdatePet(DbPetModel pet, string userlogin)
         {
             DbPetModel? toEdit = await _context.Pets.FirstOrDefaultAsync(p => p.Id == pet.Id)
-                ?? throw new InnoGotchiPetNotFoundException();
+                ?? throw new InnoGotchiNotFoundException();
 
             if (toEdit?.OwnerId != userlogin)
             {
-                throw new InnoGotchiException("Not your pet", 403);
+                throw new InnoGotchiNotYourPetException();
             }
 
             _context.Entry(toEdit).CurrentValues.SetValues(pet);
@@ -102,7 +107,7 @@ namespace InnoGotchiWebAPI.Logic
 
             if (toDelete == null)
             {
-                throw new InnoGotchiException("Can't find specified user", 404);
+                throw new InnoGotchiNotFoundException();
             }
             else
             {
@@ -117,7 +122,7 @@ namespace InnoGotchiWebAPI.Logic
         {
             DbUserModel? toReturn = await _context.Users.FirstOrDefaultAsync(p => p.Login == login);
 
-            return toReturn ?? throw new InnoGotchiException("Can't find specified user", 404);
+            return toReturn ?? throw new InnoGotchiNotFoundException();
         }
 
         public async Task<IEnumerable<DbUserModel>> GetUsers()
@@ -128,6 +133,11 @@ namespace InnoGotchiWebAPI.Logic
 
         public async Task AddUser(DbUserModel user)
         {
+            if (await UserExists(user.Login))
+            {
+                throw new InnoGotchiDBException("Specified user already exists. Use update", 409);
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
@@ -135,7 +145,7 @@ namespace InnoGotchiWebAPI.Logic
         public async Task<DbUserModel> UpdateUser(DbUserModel user)
         {
             DbUserModel? toEdit = await _context.Users.FirstOrDefaultAsync(p => p.Login == user.Login)
-                ?? throw new InnoGotchiException("Can't find specified user", 404);
+                ?? throw new InnoGotchiNotFoundException();
 
             _context.Entry(toEdit).CurrentValues.SetValues(user);
 

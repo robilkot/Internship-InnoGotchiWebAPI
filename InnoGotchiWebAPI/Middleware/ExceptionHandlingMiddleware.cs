@@ -16,25 +16,24 @@ namespace InnoGotchiWebAPI.Middleware
             {
                 await _next(context);
             }
-            catch (InnoGotchiPetNotFoundException ex)
-            {
-                context.Response.StatusCode = (int)ex.StatusCode!;
-                Log.Error("InnoGotchiPetNotFoundException caught: {msg}", ex.Message);
-                await context.Response.WriteAsync($"I am a wonderful middleware and I couldn't find a pet: {ex.Message}.");
-            }
-            catch (InnoGotchiException ex)
-            {
-                if(ex.StatusCode != null)
-                {
-                    context.Response.StatusCode = (int)ex.StatusCode;
-                }
-                Log.Error("InnoGotchiException caught: {msg}", ex.Message);
-                await context.Response.WriteAsync($"I am a wonderful middleware and I caught this specific exception: {ex.Message}.");
-            }
             catch (Exception ex)
             {
-                Log.Error("Exception caught: {msg}", ex.Message);
-                await context.Response.WriteAsync($"I am a wonderful middleware and I caught this exception: {ex.Message}");
+                if(ex is InnoGotchiDBException dbEx)
+                {
+                    context.Response.StatusCode = (int)dbEx.StatusCode!;
+                    Log.Error("InnoGotchiDBException caught: {msg}", ex.Message);
+                    await context.Response.WriteAsync($"Some problem from DB layer: {ex.Message}.");
+                }
+                else if(ex is InnoGotchiLogicException logicEx)
+                {
+                    context.Response.StatusCode = (int)logicEx.StatusCode!;
+                    Log.Error("InnoGotchiLogicException caught: {msg}", ex.Message);
+                    await context.Response.WriteAsync($"Some problem from logic layer: {ex.Message}.");
+                } else
+                {
+                    Log.Error("Exception caught: {msg}", ex.Message);
+                    await context.Response.WriteAsync($"Some problem not from program-specific layer: {ex.Message}");
+                }
             }
         }
     }
