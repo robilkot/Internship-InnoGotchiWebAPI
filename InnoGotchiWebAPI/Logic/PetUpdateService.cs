@@ -32,12 +32,9 @@ namespace InnoGotchiWebAPI.Logic
         {
             DbPetModel pet = await _dbService.GetPet(id, userlogin);
 
-            if (pet.OwnerId != userlogin)
-            {
-                throw new InnoGotchiException("Not your pet", 403);
-            }
-
             UpdateModel(pet, innogotchiOptions);
+
+            await _dbService.UpdatePet(pet, userlogin);
 
             return pet;
         }
@@ -102,6 +99,8 @@ namespace InnoGotchiWebAPI.Logic
                 pet.LastEatTime = DateTime.Now;
             }
 
+            await _dbService.UpdatePet(pet, userlogin);
+
             return pet;
         }
         public async Task<DbPetModel> Feed(Guid id, string userlogin, IOptions<InnoGotchiOptions> innogotchiOptions)
@@ -124,6 +123,8 @@ namespace InnoGotchiWebAPI.Logic
 
                 pet.LastEatTime = DateTime.Now;
             }
+
+            await _dbService.UpdatePet(pet, userlogin);
 
             return pet;
         }
