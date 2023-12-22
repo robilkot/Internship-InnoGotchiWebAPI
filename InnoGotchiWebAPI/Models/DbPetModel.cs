@@ -1,8 +1,10 @@
-﻿namespace InnoGotchiWebAPI.Models
+﻿using InnoGotchiWebAPI.Options;
+
+namespace InnoGotchiWebAPI.Models
 {
     public class DbPetModel
     {
-        public string Name { get; set; } = AppConstants.DefaultPetName;
+        public string Name { get; set; }
         public Guid Id { get; init; } = Guid.NewGuid();
         public Body Body { get; set; } = Body.Medium;
         public Eyes Eyes { get; set; } = Eyes.Brown;

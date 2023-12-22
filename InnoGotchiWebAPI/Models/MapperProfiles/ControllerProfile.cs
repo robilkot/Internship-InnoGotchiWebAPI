@@ -6,11 +6,7 @@ namespace InnoGotchiWebAPI.Models.MapperProfiles
     {
         public ControllerProfile()
         {
-            CreateMap<ClientPetModel, DbPetModel>();
-            CreateMap<DbPetModel, ClientPetModel>();
-
-            CreateMap<ClientUserModel, DbUserModel>();
-            CreateMap<DbUserModel, ClientUserModel>();
+            CreateMap<ClientPetModel, DbPetModel>().ReverseMap();
         }
     }
 }

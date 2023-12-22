@@ -2,6 +2,6 @@
 {
     public class InnoGotchiPetNotFoundException : InnoGotchiException
     {
-        public InnoGotchiPetNotFoundException(string? message = default) : base(message, 404) { }
+        public InnoGotchiPetNotFoundException(string? message = "Specified pet not found") : base(message, 404) { }
     }
 }

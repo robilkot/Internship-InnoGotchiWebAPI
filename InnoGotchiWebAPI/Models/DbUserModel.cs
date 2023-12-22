@@ -1,4 +1,6 @@
-﻿namespace InnoGotchiWebAPI.Models;
+﻿using InnoGotchiWebAPI.Options;
+
+namespace InnoGotchiWebAPI.Models;
 
 public partial class DbUserModel
 {
@@ -8,5 +10,5 @@ public partial class DbUserModel
 
     public string? Nickname { get; set; }
 
-    public string? Role { get; set; } = AppConstants.DefaultRole;
+    public string? Role { get; set; }
 }

@@ -1,17 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using InnoGotchiWebAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
 namespace InnoGotchiWebAPI.Database;
 
 public partial class InnoGotchiContext : DbContext
 {
-    public InnoGotchiContext()
+    private readonly IConfiguration _configuration;
+    public InnoGotchiContext(IConfiguration configuration)
     {
+        _configuration = configuration;
     }
 
-    public InnoGotchiContext(DbContextOptions<InnoGotchiContext> options)
+    public InnoGotchiContext(DbContextOptions<InnoGotchiContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<DbPetModel> Pets { get; set; }
@@ -21,8 +26,7 @@ public partial class InnoGotchiContext : DbContext
     public virtual DbSet<DbUsersPetModel> UsersPets { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=InnoGotchiWeb;Trusted_Connection=True;TrustServerCertificate=True;");
+       => optionsBuilder.UseSqlServer(_configuration["InnoGotchi:ConnectionString"]!);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

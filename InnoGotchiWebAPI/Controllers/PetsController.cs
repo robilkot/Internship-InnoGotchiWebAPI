@@ -2,21 +2,23 @@ using AutoMapper;
 using InnoGotchiWebAPI.Interfaces;
 using InnoGotchiWebAPI.Logic;
 using InnoGotchiWebAPI.Models;
+using InnoGotchiWebAPI.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace InnoGotchiWebAPI.Controllers
 {
     [ApiController]
-    [Route("innogotchi/pets")]
-    public class InnoGotchiPetsController : ControllerBase
+    [Route("[controller]")]
+    public class PetsController : ControllerBase
     {
-        private readonly IInnoGotchiDBPetService _dbService;
-        private readonly InnoGotchiPetUpdateService _petUpdateService;
         private readonly IMapper _mapper;
+        private readonly IDBService _dbService;
+        private readonly PetUpdateService _petUpdateService;
 
-        public InnoGotchiPetsController(IInnoGotchiDBPetService dbService, InnoGotchiPetUpdateService petUpdateService, IMapper mapper)
+        public PetsController(IDBService dbService, PetUpdateService petUpdateService, IMapper mapper)
         {
             _dbService = dbService;
             _petUpdateService = petUpdateService;
@@ -73,12 +75,9 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ClientPetModel>> GetPet(Guid id)
         {
-            var dbPet = await _dbService.GetPet(id);
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (CheckOwnership(dbPet) == false)
-            {
-                return Forbid();
-            }
+            var dbPet = await _dbService.GetPet(id, userlogin!);
 
             var clientPet = _mapper.Map<ClientPetModel>(dbPet);
 
@@ -107,15 +106,9 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ClientPetModel>> DeletePet(Guid id)
         {
-            // todo: Is this method optimal? Seems like too many db requests
-            var dbPet = await _dbService.GetPet(id);
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (CheckOwnership(dbPet) == false)
-            {
-                return Forbid();
-            }
-
-            dbPet = await _dbService.DeletePet(id);
+            var dbPet = await _dbService.DeletePet(id, userlogin!);
 
             var clientPet = _mapper.Map<ClientPetModel>(dbPet);
 
@@ -144,12 +137,7 @@ namespace InnoGotchiWebAPI.Controllers
         {
             var dbPet = _mapper.Map<DbPetModel>(pet);
 
-            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // todo: Is it ok to set ownership here?
-            dbPet.OwnerId = userlogin!;
-
-            await _dbService.PostPet(dbPet, userlogin!);
+            await _dbService.AddPet(dbPet);
 
             return Ok();
         }
@@ -176,21 +164,11 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> PutPet(ClientPetModel pet)
         {
-            bool petExists = await _dbService.PetExists(pet.Id);
-
-            if (petExists)
-            {
-                var ownerCheckingPet = await _dbService.GetPet(pet.Id);
-
-                if (CheckOwnership(ownerCheckingPet) == false)
-                {
-                    return Forbid();
-                }
-            }
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             var dbPet = _mapper.Map<DbPetModel>(pet);
 
-            await _dbService.PutPet(dbPet);
+            await _dbService.UpdatePet(dbPet, userlogin!);
 
             return Ok();
         }
@@ -199,6 +177,7 @@ namespace InnoGotchiWebAPI.Controllers
         /// Feed pet with given id in db
         /// </summary>
         /// <param name="id">Pet identifier</param>
+        /// <param name="innogotchiOptions"></param>
         /// <remarks>
         /// Sample request:
         ///
@@ -215,16 +194,11 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> Feed(Guid id)
+        public async Task<ActionResult<ClientPetModel>> Feed(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
         {
-            var dbPet = await _dbService.GetPet(id);
-
-            if (CheckOwnership(dbPet) == false)
-            {
-                return Forbid();
-            }
-
-            var pet = await _petUpdateService.Feed(id);
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+         
+            var pet = await _petUpdateService.Feed(id, userlogin!, innogotchiOptions);
 
             var clientPet = _mapper.Map<ClientPetModel>(pet);
 
@@ -235,6 +209,7 @@ namespace InnoGotchiWebAPI.Controllers
         /// Give drink to pet with given id in db
         /// </summary>
         /// <param name="id">Pet identifier</param>
+        /// <param name="innogotchiOptions"></param>
         /// <remarks>
         /// Sample request:
         ///
@@ -251,16 +226,11 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> GiveDrink(Guid id)
+        public async Task<ActionResult<ClientPetModel>> GiveDrink(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
         {
-            var dbPet = await _dbService.GetPet(id);
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (CheckOwnership(dbPet) == false)
-            {
-                return Forbid();
-            }
-
-            var pet = await _petUpdateService.GiveDrink(id);
+            var pet = await _petUpdateService.GiveDrink(id, userlogin!, innogotchiOptions);
 
             var clientPet = _mapper.Map<ClientPetModel>(pet);
 
@@ -271,6 +241,7 @@ namespace InnoGotchiWebAPI.Controllers
         /// Update pet with given id in db
         /// </summary>
         /// <param name="id">Pet identifier</param>
+        /// <param name="innogotchiOptions"></param>
         /// <remarks>
         /// Sample request:
         ///
@@ -287,16 +258,11 @@ namespace InnoGotchiWebAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ClientPetModel>> Update(Guid id)
+        public async Task<ActionResult<ClientPetModel>> Update(Guid id, IOptions<InnoGotchiOptions> innogotchiOptions)
         {
-            var dbPet = await _dbService.GetPet(id);
+            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (CheckOwnership(dbPet) == false)
-            {
-                return Forbid();
-            }
-
-            var pet = await _petUpdateService.Update(id);
+            var pet = await _petUpdateService.Update(id, userlogin!, innogotchiOptions);
 
             var clientPet = _mapper.Map<ClientPetModel>(pet);
 
@@ -306,6 +272,7 @@ namespace InnoGotchiWebAPI.Controllers
         /// <summary>
         /// Update all pets in db
         /// </summary>
+        /// <param name="innogotchiOptions"></param>
         /// <remarks>
         /// Sample request:
         ///
@@ -318,27 +285,13 @@ namespace InnoGotchiWebAPI.Controllers
         [Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<ActionResult> UpdateAll()
+        public async Task<ActionResult> UpdateAll(IOptions<InnoGotchiOptions> innogotchiOptions)
         {
             var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            await _petUpdateService.UpdateAll(userlogin!);
+            await _petUpdateService.UpdateAll(userlogin!, innogotchiOptions);
 
             return Ok();
-        }
-
-        // todo: how and where to implement check properly?
-        [NonAction]
-        private bool CheckOwnership(DbPetModel pet)
-        {
-            var userlogin = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (pet.OwnerId != userlogin)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }

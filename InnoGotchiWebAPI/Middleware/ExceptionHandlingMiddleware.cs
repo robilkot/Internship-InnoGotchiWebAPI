@@ -1,4 +1,5 @@
 ﻿using InnoGotchiWebAPI.Exceptions;
+using Serilog;
 
 namespace InnoGotchiWebAPI.Middleware
 {
@@ -18,6 +19,7 @@ namespace InnoGotchiWebAPI.Middleware
             catch (InnoGotchiPetNotFoundException ex)
             {
                 context.Response.StatusCode = (int)ex.StatusCode!;
+                Log.Error("InnoGotchiPetNotFoundException caught: {msg}", ex.Message);
                 await context.Response.WriteAsync($"I am a wonderful middleware and I couldn't find a pet: {ex.Message}.");
             }
             catch (InnoGotchiException ex)
@@ -26,10 +28,12 @@ namespace InnoGotchiWebAPI.Middleware
                 {
                     context.Response.StatusCode = (int)ex.StatusCode;
                 }
+                Log.Error("InnoGotchiException caught: {msg}", ex.Message);
                 await context.Response.WriteAsync($"I am a wonderful middleware and I caught this specific exception: {ex.Message}.");
             }
             catch (Exception ex)
             {
+                Log.Error("Exception caught: {msg}", ex.Message);
                 await context.Response.WriteAsync($"I am a wonderful middleware and I caught this exception: {ex.Message}");
             }
         }

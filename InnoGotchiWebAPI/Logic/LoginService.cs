@@ -10,19 +10,17 @@ using System.Text;
 
 namespace InnoGotchiWebAPI.Logic
 {
-    public class InnoGotchiLoginService : IInnoGotchiLoginService
+    public class LoginService : ILoginService
     {
-        private readonly IInnoGotchiDBUserService _dbUserService;
-        private readonly IMapper _mapper;
-        public InnoGotchiLoginService(IInnoGotchiDBUserService dbUserService, IMapper mapper)
+        private readonly IDBService _dbService;
+        public LoginService(IDBService dbUserService)
         {
-            _dbUserService = dbUserService;
-            _mapper = mapper;
+            _dbService = dbUserService;
         }
 
-        public async Task<ClientUserModel> Login(string login, string password)
+        public async Task<DbUserModel> Login(string login, string password)
         {
-            var user = await _dbUserService.GetUser(login);
+            var user = await _dbService.GetUser(login);
 
             var hashedPassword = GetHashedPassword(password);
 
@@ -31,28 +29,13 @@ namespace InnoGotchiWebAPI.Logic
                 throw new InnoGotchiException("Wrong password", 401);
             }
 
-            var claims = new List<Claim> {
-                new Claim(ClaimTypes.NameIdentifier, login),
-                new Claim(ClaimTypes.Role, user.Role!)
-            };
-
-            var jwt = new JwtSecurityToken(
-                    claims: claims,
-                    issuer: AppConstants.TokenIssuer,
-                    expires: DateTime.Now.Add(AppConstants.TokenLifeTime),
-                    signingCredentials: new SigningCredentials(AppConstants.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var token = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            var clientUser = _mapper.Map<ClientUserModel>(user);
-            clientUser.Token = token;
-
-            return clientUser;
+            return user;
         }
 
 
         public async Task Register(string login, string password, string? nickname = default)
         {
-            if (await _dbUserService.UserExists(login))
+            if (await _dbService.UserExists(login))
             {
                 throw new InnoGotchiException("User with this login already exists", 409);
             }
@@ -66,7 +49,7 @@ namespace InnoGotchiWebAPI.Logic
                 Nickname = nickname
             };
 
-            await _dbUserService.PostUser(userModel);
+            await _dbService.AddUser(userModel);
         }
 
         private static byte[] GetHashedPassword(string password)

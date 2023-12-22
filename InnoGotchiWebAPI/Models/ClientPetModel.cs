@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using InnoGotchiWebAPI.Options;
 
 namespace InnoGotchiWebAPI.Models
 {
@@ -9,7 +10,7 @@ namespace InnoGotchiWebAPI.Models
         public Eyes Eyes { get; set; } = Eyes.Brown;
         public Nose Nose { get; set; } = Nose.Medium;
         public Mouth Mouth { get; set; } = Mouth.Medium;
-        public string Name { get; set; } = AppConstants.DefaultPetName;
+        public string Name { get; set; }
 
         private DateTime _created = DateTime.Now;
         public DateTime Created
